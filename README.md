@@ -52,9 +52,21 @@ internship_scripts/
 │   summary statistics (nucleotide diversity π, absolute
 │   divergence Dxy, Tajima's D) using pixy.
 │
-└── high_qual_figures/
-    High-resolution versions of the figures included in the
-    internship report (PDF and/or PNG format).
+Generated_figures/
+├── 1.Phylogenetic_tree_reference_assemblies/   ML phylogeny (RAxML-NG)
+├── 2.Read_mapp_snp_alling_qual_filter/         alignment heatmaps,
+│                                                mapping-rate tables (CSV),
+│                                                and QC stats plots per site
+├── 3.Pop_structure_admixture_analysis/
+│   ├── PCA/                                     per-dataset PCA plots
+│   ├── SplitsTree/                              Neighbor-Net networks
+│   │                                            (.png) + input files
+│   │                                            (.nexus, .phy)
+│   └── sNMF/                                    best-K barplots, all-K
+│                                                barplots, cross-entropy plots
+├── 4.Clone_id_spatial_analysis/                clone-correction histograms
+│                                                (per site + combined)
+└── 5.Population_genomic_stat/                   pixy π, Dxy and Tajima's D plots
 ```
 
 ---
