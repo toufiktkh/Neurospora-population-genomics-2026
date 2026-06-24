@@ -153,7 +153,7 @@ Raw sequencing data (Illumina paired-end, GBS) are not deposited here as they ar
 |---|---|---|---|
 | Domefire E-DF1 | E-DF1 (unpublished) | *Neurospora* sp. | 51 |
 | Domefire E-DF3 | E-DF3 (unpublished) | *N. discreta* PS4B | 9 |
-| Villeveyrac | Vill-A1-3 | *N. crassa* clade | 42|
+| Villeveyrac | Vill-A1-3 | *N. crassa* clade | 43|
 | La Grande Motte | neutre-22 | *Neurospora* aff. *tetrasperma* | 20 |
 
 ---
