@@ -1,0 +1,119 @@
+library(ggplot2)
+library(data.table)
+
+stats_dir    <- "/shared/home/toufiktakhi/neurosporagbs/dp_mq_all_sites_domefire/readmapping_stats_DF3/"
+output_pdf   <- "/shared/home/toufiktakhi/neurosporagbs/stats/E-DF3_all_sites_stats_figures.pdf"
+output_table <- "/shared/home/toufiktakhi/neurosporagbs/stats/E-DF3_all_sites_stats_summary.csv"
+vcf_file     <- "/shared/home/toufiktakhi/neurosporagbs/E-DF3_all_sites_filtered.vcf.gz"
+
+dp_file      <- file.path(stats_dir, "all_sites_DP.txt.gz")
+mq_file      <- file.path(stats_dir, "all_sites_MQ.txt.gz")
+qual_file    <- file.path(stats_dir, "all_sites_QUAL.txt.gz")
+
+
+dir.create(dirname(output_pdf), recursive = TRUE, showWarnings = FALSE)
+
+cat("Extracting sample names...\n")
+clean_samples <- system(paste("bcftools query -l", vcf_file), intern = TRUE)
+
+# Read matrices
+cat("Reading Depth (DP) matrix...\n")
+dp_mat <- fread(dp_file, header = FALSE, fill = TRUE, na.strings = ".")
+colnames(dp_mat) <- c("CHROM", "POS", clean_samples)
+
+# This converts any DP of 0, 1, or 2 into "Missing" so it isn't plotted
+for (col in clean_samples) set(dp_mat, j = col, value = replace(dp_mat[[col]], dp_mat[[col]] < 3, NA))
+
+# solution bug 1: Calculate Summary Table Column-by-Column
+cat("Calculating summary stats...\n")
+summary_list <- list()
+for (s in clean_samples) {
+    # Calculate stats directly per column
+    summary_list[[s]] <- data.table(
+        sample = s,
+        mean_DP = round(mean(dp_mat[[s]], na.rm = TRUE), 2),
+        median_DP = median(dp_mat[[s]], na.rm = TRUE)
+    )
+}
+summary_table <- rbindlist(summary_list)
+write.csv(summary_table, output_table, row.names = FALSE)
+cat("Summary table saved successfully.\n")
+
+# solution bug 2: Downsample DP Matrix for Plotting Only 
+cat("Downsampling data for visualization...\n")
+set.seed(42)
+# Take a random sample of 100,000 genomic positions to plot (plenty for boxplots)
+if (nrow(dp_mat) > 100000) {
+    dp_mat_sample <- dp_mat[sample(1:nrow(dp_mat), 100000), ]
+} else {
+    dp_mat_sample <- dp_mat
+}
+
+# Melt ONLY the tiny downsampled matrix
+dp_long_plot <- melt(dp_mat_sample, id.vars = c("CHROM", "POS"), variable.name = "sample", value.name = "DP")
+
+rm(dp_mat, dp_mat_sample); gc()
+
+# Load MQ and QUAL (and downsample them too)
+cat("Reading MQ matrix...\n")
+mq_mat <- fread(mq_file, header = FALSE, fill = TRUE, na.strings = ".")
+colnames(mq_mat) <- c("CHROM", "POS", "MQ")
+if (nrow(mq_mat) > 500000) mq_mat <- mq_mat[sample(1:.N, 500000)] # Downsample MQ
+
+cat("Reading QUAL matrix...\n")
+qual_df <- fread(qual_file, header = FALSE, col.names = "QUAL", na.strings = ".")
+qual_vals <- qual_df$QUAL[!is.na(qual_df$QUAL)]
+if (length(qual_vals) > 500000) qual_vals <- sample(qual_vals, 500000) # Downsample QUAL
+rm(qual_df); gc()
+
+
+# figures
+cat("Generating FINAL plots...\n")
+pdf(output_pdf, width = 16, height = 8)
+
+# 1. Global DP Boxplot
+print(
+    ggplot(dp_long_plot[!is.na(DP)], aes(x = sample, y = DP)) +
+    geom_boxplot(fill = "steelblue", outlier.size = 0.5) +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 6)) + 
+    labs(title = "Sequencing depth (DP) per individual (Sampled Data) - E-DF3", x = "Individual", y = "DP")
+)
+
+# 2. DP Boxplot (Zoomed 0-375)
+print(
+    ggplot(dp_long_plot[!is.na(DP) & DP <= 375], aes(x = sample, y = DP)) +
+    geom_boxplot(fill = "steelblue", outlier.size = 0.5) +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 6)) +
+    labs(title = "Filtered sequencing depth (DP) per individual (Zoom 0-375) - E-DF3", x = "Individual", y = "DP")
+)
+
+# 3. Global MQ Histogram
+print(
+    ggplot(mq_mat[!is.na(MQ)], aes(x = MQ)) +
+    geom_histogram(bins = 50, fill = "darkorange", color = "white") +
+    labs(title = "Mapping Quality (MQ) distribution - E-DF3\n(Includes reference sites)", x = "MQ", y = "Count")
+)
+
+# 4. Global QUAL Histogram
+print(
+    ggplot(data.frame(QUAL = qual_vals), aes(x = QUAL)) +
+    geom_histogram(bins = 50, fill = "tomato", color = "white") +
+    labs(title = "Variant Quality (QUAL) distribution - E-DF3\n(Includes reference sites at QUAL 0)", x = "QUAL", y = "Count")
+)
+
+# 5. Per-Individual DP Histograms
+for (indiv in clean_samples) {
+    indiv_dp <- dp_long_plot[sample == indiv, DP]
+    indiv_dp <- indiv_dp[!is.na(indiv_dp)]
+
+    print(
+        ggplot(data.frame(DP = indiv_dp[indiv_dp <= 375]), aes(x = DP)) +
+        geom_histogram(bins = 50, fill = "steelblue", color = "white") +
+        labs(title = paste("DP distribution -", indiv), x = "Depth", y = "Count")
+    )
+}
+
+dev.off()
+cat("\nSuccess! Final graphs and table generated without bug.\n")
