@@ -10,7 +10,7 @@
 
 ## Overview
 
-This repository contains all bioinformatic scripts used in the M1 internship report on the population genetic structure of pyrophilous, plant-associated *Neurospora* populations sampled from three post-fire sites:
+This repository contains all bioinformatic scripts used in the M1 internship report on the population genetic structure of pyrophilous, endophytic *Neurospora* populations sampled from three post-fire sites:
 
 - **Domefire** — Cima Dome, Mojave National Preserve, California, USA (burned Joshua trees, *Yucca brevifolia* var. *jaegeriana*, 2020 Dome Fire)
 - **Villeveyrac** — Hérault, France (burned *Cytisus* sp. shrubs, 2021 wildfire)
