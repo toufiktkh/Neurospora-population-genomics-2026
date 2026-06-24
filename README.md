@@ -2,7 +2,7 @@
 
 **Author:** Toufik Yahia Takhi  
 **Supervisor:** Pierre Gladieux (PHIM, INRAE Montpellier)  
-**Institution:** Institut Agro / Université de Montpellier — Master IMHE  
+**Institution:** Université de Montpellier — Spécialité : Master 1 Interactions Microorganismes-Hôtes-Environnements (IMHE)  
 **Cluster:** IFB (Institut Français de Bioinformatique) SLURM cluster  
 **Report title:** *Structure génétique des populations du champignon endophyte pyrophile Neurospora*
 
