@@ -69,22 +69,22 @@ All analyses were run on the IFB SLURM cluster. Modules were loaded via `module 
 | Bowtie2 | 2.3.4.3 | Reference-guided read mapping |
 | samtools | 1.9 | BAM sorting and indexing |
 | bcftools | 1.16 | SNP/invariant-site calling and VCF filtering |
-| htslib / tabix / bgzip | — | VCF compression and indexing |
+| htslib / tabix / bgzip | 1.9 | VCF compression and indexing |
 | BUSCO | 6.0.0 | Single-copy core gene identification (sordariales_odb12) |
 | MAFFT | 7.525 | Multiple sequence alignment |
 | trimAl | 1.4.1 | Alignment trimming |
 | RAxML-NG | 1.2.2 | Maximum-likelihood phylogenetic inference |
 | PLINK | 1.90b6.18 | SNP filtering, LD pruning, PCA |
-| vcftools | — | Per-individual missingness statistics |
-| vcf2phylip | — | VCF to PHYLIP/NEXUS conversion for SplitsTree |
-| SplitsTree4 | — | Neighbor-Net network visualisation |
+| vcftools | 0.1.16 | Per-individual missingness statistics |
+| vcf2phylip | 2.8 | VCF to PHYLIP/NEXUS conversion for SplitsTree |
+| SplitsTree4 | 4.19.2 | Neighbor-Net network visualisation |
 | pixy | 2.0.0.beta14 | π, Dxy, Tajima's D estimation |
 | R | 4.5.2 | All downstream analysis and visualisation |
-| R — vcfR | — | VCF import in R |
-| R — poppr | — | Clone identification and correction |
-| R — LEA | — | sNMF ancestry estimation |
-| R — ggplot2 | — | Visualisation |
-| Python | 3.x | Alignment processing and batch SLURM script generation |
+| R — vcfR | 1.16.0 | VCF import in R |
+| R — poppr | 2.9.8 | Clone identification and correction |
+| R — LEA | 1.4.0 | sNMF ancestry estimation |
+| R — ggplot2 | 4.0.3 | Visualisation |
+| Python | 3 | Alignment processing and batch SLURM script generation |
 
 ---
 
@@ -101,7 +101,7 @@ The analyses follow five sequential steps. Each numbered directory corresponds t
    → filter (gap ≤5%, length ≥2000bp, ≥5 variable sites)
    → partitioned supermatrix
    → RAxML-NG (--all, --bs-trees autoMRE)
-   → rooted on Boothiella tetraspora in iTOL v7
+   → rooted on *Boothiella tetraspora* in iTOL v7
 
 2. Read mapping, SNP calling and quality filtering
    fastp (Q20, length ≥50bp, --detect_adapter_for_pe)
@@ -139,10 +139,10 @@ Raw sequencing data (Illumina paired-end, GBS) are not deposited here as they ar
 
 | Dataset | Reference assembly | Species assignment | n isolates (initial) |
 |---|---|---|---|
-| Domefire E-DF1 | E-DF1 (unpublished) | *Neurospora* sp. | 42 |
+| Domefire E-DF1 | E-DF1 (unpublished) | *Neurospora* sp. | 51 |
 | Domefire E-DF3 | E-DF3 (unpublished) | *N. discreta* PS4B | 9 |
-| Villeveyrac | Vill-A1-3 | *N. crassa* clade | 39 |
-| La Grande Motte | neutre-22 | *Neurospora* aff. *tetrasperma* | 19 |
+| Villeveyrac | Vill-A1-3 | *N. crassa* clade | 42|
+| La Grande Motte | neutre-22 | *Neurospora* aff. *tetrasperma* | 20 |
 
 ---
 
@@ -150,7 +150,7 @@ Raw sequencing data (Illumina paired-end, GBS) are not deposited here as they ar
 
 1. Clone this repository:
 ```bash
-git clone https://github.com/[your-username]/neurospora-population-genomics-2026.git
+git clone https://github.com/toufiktkh/neurospora-population-genomics-2026.git
 cd neurospora-population-genomics-2026
 ```
 
@@ -169,7 +169,7 @@ module load bowtie2/2.3.4.3 samtools/1.9 fastp/1.0.1 bcftools busco/6.0.0 \
 ## Notes
 
 - Ploidy is set to 1 (haploid) for all datasets except La Grande Motte, which was called with `--ploidy 2` (suspected diploid *N.* aff. *tetrasperma*).
-- The all-sites VCF (including invariant positions, produced by `bcftools call -m`) is required as input for pixy. Variants-only VCFs (produced by `bcftools call -mv` or extracted with `--exclude-types`) are used for all other analyses.
+- The all-sites VCF (including invariant positions, produced by `bcftools call -m`) is required as input for pixy. Variants-only VCFs (produced by PLINK filtertaion `-maff 0.05` or extracted with `--exclude-types`) are used for all other analyses.
 - Clone correction was applied separately before sNMF and pixy analyses. The clone-corrected isolate lists are written to `*_snps_only_samples_to_keep.txt` files by the clone-correction script.
 - The `high_qual_figures/` directory contains the figures used in the internship report at print resolution.
 
@@ -179,7 +179,7 @@ module load bowtie2/2.3.4.3 samtools/1.9 fastp/1.0.1 bcftools busco/6.0.0 \
 
 If you use or adapt these scripts, please cite:
 
-> Takhi T.-Y. (2026). *Structure génétique des populations du champignon endophyte pyrophile Neurospora* — M1 IMHE internship report, Institut Agro / Université de Montpellier. Supervised by P. Gladieux, PHIM, INRAE Montpellier. Scripts available at: https://github.com/toufiktkh/neurospora-population-genomics-2026
+> Takhi T. Y. (2026). *Structure génétique des populations du champignon endophyte pyrophile Neurospora* — M1 IMHE internship report, Université de Montpellier. Supervised by P. Gladieux, PHIM, INRAE Montpellier. Scripts available at: https://github.com/toufiktkh/neurospora-population-genomics-2026
 
 ---
 
